@@ -1,0 +1,77 @@
+wait("0.2")
+local MAX_WALK_SPEED = 50  
+local MAX_JUMP_HEIGHT = 100  
+local MAX_FALL_SPEED = 200  
+local SPEED_CHECK_INTERVAL = 2  
+local FALL_CHECK_INTERVAL = 1  
+
+local function checkPlayerSpeed(player)
+    local character = player.Character
+    if not character then return end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    while humanoid and humanoid.Parent do
+        wait(SPEED_CHECK_INTERVAL)
+        if humanoid.WalkSpeed > MAX_WALK_SPEED then
+            player:Kick("Cheating detected: Speed hack.")
+            return
+        end
+    end
+end
+
+local function checkPlayerJump(player)
+    local character = player.Character
+    if not character then return end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    while humanoid and humanoid.Parent do
+        wait(SPEED_CHECK_INTERVAL)
+        if humanoid.JumpHeight > MAX_JUMP_HEIGHT then
+            player:Kick("Cheating detected: Jump hack.")
+            return
+        end
+    end
+end
+
+local function checkPlayerFallSpeed(player)
+    local character = player.Character
+    if not character then return end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    local lastPosition = character.HumanoidRootPart.Position
+    while humanoid and humanoid.Parent do
+        wait(FALL_CHECK_INTERVAL)
+        local currentPosition = character.HumanoidRootPart.Position
+        local fallSpeed = (lastPosition.Y - currentPosition.Y) / FALL_CHECK_INTERVAL
+        if fallSpeed > MAX_FALL_SPEED then
+            player:Kick("Cheating detected: Fall speed hack.")
+            return
+        end
+        lastPosition = currentPosition
+    end
+end
+
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        spawn(function()
+            checkPlayerSpeed(player)
+        end)
+
+        spawn(function()
+            checkPlayerJump(player)
+        end)
+
+        spawn(function()
+            checkPlayerFallSpeed(player)
+        end)
+    end)
+end)
+
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+end)
